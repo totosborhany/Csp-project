@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Csp Project</title>
+
+   <style>
+      table,
+      th,
+      td {
+         border: 1px solid black;
+         padding: 10px;
+      }
+
+      table {
+         width: 600px;
+         height: 400px;
+      }
+
+      td {
+         padding: 40px;
+      }
+
+      th {
+         padding: 15px;
+      }
+   </style>
+
+
+</head>
+
+<body>
+   <h1 style="text-align: center;">CSP Project</h1>
+
+   <form id="csvForm" enctype="multipart/form-data">
+      <div style="display: flex; justify-content: center; flex-direction: column; align-items: center;font-size: 30px;">
+         <div>
+            <label for="course">choose course file :</label>
+            <input type="file" name="course" id="coursefile" accept=".csv" required style="padding: 20px;">
+         </div>
+         <br>
+         <div>
+            <label for="instructor">choose instructor file :</label>
+            <input type="file" name="instructor" id="instructorfile" accept=".csv" required>
+         </div>
+         <br>
+         <div>
+            <label for="room">choose room file :</label>
+            <input type="file" name="room" id="roomfile" accept=".csv" required>
+         </div>
+         <br>
+         <div>
+            <label for="timeslot">choose timeslot file :</label>
+            <input type="file" name="timeslot" id="timeslotfile" accept=".csv" required>
+         </div>
+         <br>
+         <div>
+            <label for="section">choose section file :</label>
+            <input type="file" name="section" id="sectionfile" accept=".csv" required>
+
+            <button type="submit" style="padding: 20px;">Upload</button>
+         </div>
+      </div>
+      <div id="note" style="display: flex; align-items: center; justify-content: center; font-size: 25px;">
+         <div>
+            <h2 style="color: red;">Note</h2>
+            <p>the files must follow this format:</p>
+            <ul style="line-height: 45px;">
+               <li>Courses: CourseID, CourseName, Credits, Type (Lecture/Lab),Semester</li>
+               <li>Instructors: InstructorID, Name, nonPreferredSlots, QualifiedCourses</li>
+               <li>Rooms: RoomID, Type (Lab/Lecture), Capacity</li>
+               <li>TimeSlots: Day, StartTime, EndTime</li>
+               <li>Sections: SectionID, Semester, StudentCount</li>
+            </ul>
+         </div>
+      </div>
+
+      <div>
+         <button disabled>Generate Table</button>
+      </div>
+   </form>
+
+   <table id="roomsTable">
+      <caption>Rooms Usage (Sunday — Thursday)</caption>
+      <thead>
+         <tr>
+            <th>Day</th>
+            <th>Time</th>
+            <th>R101</th>
+            <th>R102</th>
+            <th>R103</th>
+            <th>R104</th>
+            <th>R105</th>
+         </tr>
+      </thead>
+      <tbody>
+         <tr>
+            <td rowspan="4">Sunday</td>
+            <td>9:00 - 10:30</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>10:45 - 12:15</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>12:30 - 2:00</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>2:15 - 3:45</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+
+         <tr>
+            <td rowspan="4">Monday</td>
+            <td>9:00 - 10:30</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>10:45 - 12:15</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>12:30 - 2:00</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>2:15 - 3:45</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td rowspan="4">Tuesday</td>
+            <td>9:00 - 10:30</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>10:45 - 12:15</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>12:30 - 2:00</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>2:15 - 3:45</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td rowspan="4">Wednesday</td>
+            <td>9:00 - 10:30</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>10:45 - 12:15</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>12:30 - 2:00</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>2:15 - 3:45</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td rowspan="4">Thursday</td>
+            <td>9:00 - 10:30</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>10:45 - 12:15</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>12:30 - 2:00</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+         <tr>
+            <td>2:15 - 3:45</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+         </tr>
+
+      </tbody>
+   </table>
+   <footer></footer>
+   <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"></script>
+   <script src="./script.js"></script>
+
+   <script>
+      document.getElementById("csvForm").addEventListener("submit", async (e) => {
+         e.preventDefault();
+
+
+         const formData = new FormData(e.target);
+         const response = await fetch("http://localhost:3000/upload", {
+            method: "POST",
+            body: formData,
+         });
+
+         const result = await response.json();
+         console.log(result);
+      });
+
+
+      fetch("http://localhost:3000/rooms")
+         .then(res => res.json())
+         .then(data => {
+            const table = document.querySelector("#roomsTable");
+            const headerRow = table.querySelector("thead tr");
+            const tbody = table.querySelector("tbody");
+
+            while (headerRow.children.length > 2) {
+               headerRow.removeChild(headerRow.lastChild);
+            }
+
+            data.forEach(room => {
+               const th = document.createElement("th");
+               th.textContent = room.roomid || room.RoomID || room.rid;
+               headerRow.appendChild(th);
+            });
+
+            tbody.innerHTML = "";
+
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+            const times = ["9:00 - 10:30", "10:45 - 12:15", "12:30 - 2:00", "2:15 - 3:45"];
+
+            days.forEach(day => {
+               times.forEach((time, idx) => {
+                  const row = document.createElement("tr");
+
+                  if (idx === 0) {
+                     const dayCell = document.createElement("td");
+                     dayCell.textContent = day;
+                     dayCell.rowSpan = times.length;
+                     row.appendChild(dayCell);
+                  }
+
+                  const timeCell = document.createElement("td");
+                  timeCell.textContent = time;
+                  row.appendChild(timeCell);
+
+                  data.forEach(() => {
+                     const td = document.createElement("td");
+                     td.innerHTML = "&nbsp;";
+                     row.appendChild(td);
+                  });
+
+                  tbody.appendChild(row);
+               });
+            });
+         })
+         .catch(err => console.error(err));
+   </script>
+
+</body>
+
+</html>
