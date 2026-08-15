@@ -26,6 +26,81 @@
       th {
          padding: 15px;
       }
+
+      #still_doing {
+         display: none;
+      }
+
+      #loader {
+         position: absolute;
+         left: 50%;
+         top: 50%;
+         z-index: 1;
+         width: 120px;
+         height: 120px;
+         margin: -76px 0 0 -76px;
+         border: 16px solid #f3f3f3;
+         border-radius: 50%;
+         border-top: 16px solid #3498db;
+         -webkit-animation: spin 2s linear infinite;
+         animation: spin 2s linear infinite;
+      }
+
+      @-webkit-keyframes spin {
+         0% {
+            -webkit-transform: rotate(0deg);
+         }
+
+         100% {
+            -webkit-transform: rotate(360deg);
+         }
+      }
+
+      @keyframes spin {
+         0% {
+            transform: rotate(0deg);
+         }
+
+         100% {
+            transform: rotate(360deg);
+         }
+      }
+
+      .loader {
+         border: 16px solid #f3f3f3;
+         border-radius: 50%;
+         border-top: 16px solid #3498db;
+         width: 60px;
+         height: 60px;
+         -webkit-animation: spin 2s linear infinite;
+         /* Safari */
+         animation: spin 2s linear infinite;
+      }
+
+      /* Safari */
+      @-webkit-keyframes spin {
+         0% {
+            -webkit-transform: rotate(0deg);
+         }
+
+         100% {
+            -webkit-transform: rotate(360deg);
+         }
+      }
+
+      @keyframes spin {
+         0% {
+            transform: rotate(0deg);
+         }
+
+         100% {
+            transform: rotate(360deg);
+         }
+      }
+
+      /* #over { 
+         display: none; 
+      } */
    </style>
 
 
@@ -60,7 +135,9 @@
             <label for="section">choose section file :</label>
             <input type="file" name="section" id="sectionfile" accept=".csv" required>
 
+
             <button type="submit" style="padding: 20px;">Upload</button>
+
          </div>
       </div>
       <div id="note" style="display: flex; align-items: center; justify-content: center; font-size: 25px;">
@@ -77,10 +154,31 @@
          </div>
       </div>
 
-      <div>
-         <button disabled>Generate Table</button>
-      </div>
    </form>
+   <div style="display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 20px;">
+      <button id="generate" style="width: 50% ; padding: 20px; text-align: center;">Generate
+         Table</button>
+
+      <button id="exportCSV" style="width: 50% ; padding: 20px; text-align: center;">export to xlsx </button>
+
+   </div>
+   <div id="still_doing" style="text-align: center;">
+      <h2 style="font-size: 40px;">generating table</h2>
+
+      <div class="loader" style="margin-left: 950px;"></div>
+
+   </div>
+   <div id="filter" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 20px;">
+      <h3>filter by :
+      </h3>
+      <select id="selectinst">
+         <option>all</option>
+      </select>
+      <select id="selectsection">
+         <option>all</option>
+      </select>
+      <button id="apply">apply filter</button>
+   </div>
 
    <table id="roomsTable">
       <caption>Rooms Usage (Sunday — Thursday)</caption>
@@ -266,14 +364,134 @@
       </tbody>
    </table>
    <footer></footer>
-   <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
-      crossorigin="anonymous"></script>
-   <script src="./script.js"></script>
+   <script src="script.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
    <script>
+
+
+      async function filterLectures() {
+         const inst = document.getElementById("selectinst").value;
+         const sec = document.getElementById("selectsection").value;
+
+         const response = await fetch("http://localhost:3000/lectures");
+         const lectures = await response.json();
+
+         const filtered = lectures.filter(lec => {
+            const matchInst = inst === "all" || lec.instructor === inst || lec.name === inst;
+            const matchSec = sec === "all" || lec.section === sec;
+
+            return matchInst && matchSec;
+         });
+
+         await buildRoomTable();
+         await populateFilteredLectures(filtered);
+      }
+
+      document.getElementById("apply").onclick = filterLectures;
+
+
+
+      let loader = document.querySelector("#still_doing");
+      let elapsed = 0;
+      let timerInterval;
+
+      function incrementSeconds() {
+         elapsed++;
+         document.getElementById("timer").innerText = `Time: ${elapsed}s`;
+      }
+
+      document.getElementById("generate").addEventListener("click", async () => {
+         const btn = document.getElementById("generate");
+         btn.disabled = true;
+               const start = Date.now();
+
+         elapsed = 0;
+         loader.style.display = "block";
+         timerInterval = setInterval(incrementSeconds, 1000);
+
+         try {
+            const rooms = await buildRoomTable();
+
+            const response = await fetch("http://localhost:3000/generate-schedule");
+            if (!response.ok) throw new Error("Failed to generate schedule");
+
+            const lectures = await response.json();
+            await populateLectures(lectures);
+            await loadInstructorAndSections();
+
+
+         } catch (err) {
+            console.error(err);
+         } finally {
+
+            clearInterval(timerInterval);
+            loader.style.display = "none";
+            alert("Time elapsed: " + ((Date.now() - start) / 1000) + " seconds");
+            btn.disabled = false;
+
+         }
+      });
+
+
+      window.addEventListener("load", async () => {
+       //  alert(":loaded");
+         const inst = localStorage.getItem("filter_inst");
+         const sec = localStorage.getItem("filter_sec");
+
+         if (!inst && !sec) return;
+
+         const response = await fetch("http://localhost:3000/lectures");
+         const lectures = await response.json();
+
+         const filtered = lectures.filter(l =>
+            (inst === "all" || l.instructor === inst) &&
+            (sec === "all" || l.section === sec)
+         );
+
+         await buildRoomTable();
+         await populateFilteredLectures(filtered);
+
+         localStorage.removeItem("filter_inst");
+         localStorage.removeItem("filter_sec");
+      });
+
+
+      async function loadInstructorAndSections() {
+         const response = await fetch("http://localhost:3000/lectures");
+         const lectures = await response.json();
+
+         const selectInst = document.getElementById("selectinst");
+         const selectSection = document.getElementById("selectsection");
+
+         const instSet = new Set();
+         const sectionSet = new Set();
+
+         lectures.forEach(item => {
+            if (item.name) instSet.add(item.name);
+            if (item.section) sectionSet.add(item.section);
+         });
+
+         instSet.forEach(instructor => {
+            const option = document.createElement("option");
+            option.value = instructor;
+            option.textContent = instructor;
+            selectInst.appendChild(option);
+         });
+
+         sectionSet.forEach(section => {
+            const option = document.createElement("option");
+            option.value = section;
+            option.textContent = section;
+            selectSection.appendChild(option);
+         });
+      }
+
+
+
+
       document.getElementById("csvForm").addEventListener("submit", async (e) => {
          e.preventDefault();
-
 
          const formData = new FormData(e.target);
          const response = await fetch("http://localhost:3000/upload", {
@@ -286,55 +504,193 @@
       });
 
 
-      fetch("http://localhost:3000/rooms")
-         .then(res => res.json())
-         .then(data => {
-            const table = document.querySelector("#roomsTable");
-            const headerRow = table.querySelector("thead tr");
-            const tbody = table.querySelector("tbody");
 
-            while (headerRow.children.length > 2) {
-               headerRow.removeChild(headerRow.lastChild);
-            }
 
-            data.forEach(room => {
-               const th = document.createElement("th");
-               th.textContent = room.roomid || room.RoomID || room.rid;
-               headerRow.appendChild(th);
-            });
 
-            tbody.innerHTML = "";
+async function buildRoomTable() {
+   const res = await fetch("http://localhost:3000/rooms");
+   const rooms = await res.json();
 
-            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-            const times = ["9:00 - 10:30", "10:45 - 12:15", "12:30 - 2:00", "2:15 - 3:45"];
+   const timeRes = await fetch("http://localhost:3000/timeslots");
+   const timeSlots = await timeRes.json();
 
-            days.forEach(day => {
-               times.forEach((time, idx) => {
-                  const row = document.createElement("tr");
+   const table = document.querySelector("#roomsTable");
+   const headerRow = table.querySelector("thead tr");
+   const tbody = table.querySelector("tbody");
 
-                  if (idx === 0) {
-                     const dayCell = document.createElement("td");
-                     dayCell.textContent = day;
-                     dayCell.rowSpan = times.length;
-                     row.appendChild(dayCell);
-                  }
+   while (headerRow.children.length > 2) {
+      headerRow.removeChild(headerRow.lastChild);
+   }
 
-                  const timeCell = document.createElement("td");
-                  timeCell.textContent = time;
-                  row.appendChild(timeCell);
+   rooms.forEach(room => {
+      const th = document.createElement("th");
+      th.textContent = room.roomid || room.RoomID || room.rid;
+      headerRow.appendChild(th);
+   });
 
-                  data.forEach(() => {
-                     const td = document.createElement("td");
-                     td.innerHTML = "&nbsp;";
-                     row.appendChild(td);
-                  });
+   const days = [...new Set(timeSlots.map(t => t.day))];
+   const times = [...new Set(
+      timeSlots.map(t => `${t.starttime} - ${t.endtime}`)
+   )];
 
-                  tbody.appendChild(row);
-               });
-            });
-         })
-         .catch(err => console.error(err));
+   tbody.innerHTML = "";
+
+   days.forEach(day => {
+      times.forEach((time, idx) => {
+         const row = document.createElement("tr");
+
+         if (idx === 0) {
+            const dayCell = document.createElement("td");
+            dayCell.textContent = day;
+            dayCell.rowSpan = times.length;
+            row.appendChild(dayCell);
+         }
+
+         const timeCell = document.createElement("td");
+         timeCell.textContent = time;
+         row.appendChild(timeCell);
+
+         rooms.forEach(room => {
+            const td = document.createElement("td");
+            td.dataset.day = day;
+            td.dataset.time = time;
+            td.dataset.room = (room.roomid || room.RoomID || room.rid).trim();
+            td.innerHTML = "&nbsp;";
+            row.appendChild(td);
+         });
+
+         tbody.appendChild(row);
+      });
+   });
+
+   return rooms;
+}
+
+
+      
+async function populateLectures() {
+   const response = await fetch("http://localhost:3000/lectures");
+   const lectures = await response.json();
+
+   const tbody = document.querySelector("#roomsTable tbody");
+
+   Array.from(tbody.querySelectorAll("td")).forEach(cell => {
+      if (cell.dataset.room) {
+         cell.style.backgroundColor = "";
+         cell.style.border = "";
+         cell.innerHTML = "&nbsp;";
+      }
+   });
+
+   lectures.forEach(lec => {
+      const day = lec.timeslot || lec.day;
+      const room = (lec.room || lec.roomid || "").trim();
+      const course = lec.course || lec.coursename || lec.courseid;
+      const section = lec.section || "";
+      const instructor = lec.name || lec.instructorname;
+      const time = `${lec.starttime} - ${lec.endtime}`;
+
+      const cell = Array.from(tbody.querySelectorAll("td")).find(td =>
+         td.dataset.day === day &&
+         td.dataset.time === time &&
+         td.dataset.room === room
+      );
+
+      if (cell) {
+         cell.style.backgroundColor = "#25EFF5";
+         cell.style.border = "2px solid #888";
+         cell.innerHTML = `
+            <b>${course}</b><br>
+            <small>${section}</small><br>
+            <small>${instructor}</small>
+         `;
+      }
+   });
+}
+
+
+      window.addEventListener("load", async () => {
+         await buildRoomTable();
+         await populateLectures();
+         await loadInstructorAndSections();
+      });
+
+
+async function populateFilteredLectures(lectures) {
+   const tbody = document.querySelector("#roomsTable tbody");
+
+   Array.from(tbody.querySelectorAll("td")).forEach(cell => {
+      if (cell.dataset.room) {
+         cell.style.backgroundColor = "";
+         cell.style.border = "";
+         cell.innerHTML = "&nbsp;";
+      }
+   });
+
+   lectures.forEach(lec => {
+      const day = lec.timeslot || lec.day;
+      const room = (lec.room || lec.roomid || "").trim();
+      const course = lec.course || lec.coursename || lec.courseid;
+      const section = lec.section || "";
+      const instructor = lec.name || lec.instructorname;
+      const time = `${lec.starttime} - ${lec.endtime}`;
+
+      const cell = Array.from(tbody.querySelectorAll("td")).find(td =>
+         td.dataset.day === day &&
+         td.dataset.time === time &&
+         td.dataset.room === room
+      );
+
+      if (cell) {
+         cell.style.backgroundColor = "#25EFF5";
+         cell.style.border = "2px solid #888";
+         cell.innerHTML = `
+            <b>${course}</b><br>
+            <small>${section}</small><br>
+            <small>${instructor}</small>
+         `;
+      }
+   });
+}
+
+     // buildRoomTable().then(populateLectures);
+
+
+      document.getElementById("exportCSV").addEventListener("click", () => {
+
+         const table = document.getElementById("roomsTable");
+         table.querySelectorAll("th, td").forEach(cell => {
+            cell.style.padding = "40px";
+            cell.style.border = "1px solid black";
+         });
+
+         const htmlContent = ` 
+        <html> 
+        <head> 
+            <meta charset="UTF-8"> 
+            <title>Schedule</title> 
+        </head> 
+        <body> 
+            ${table.outerHTML} 
+        </body> 
+        </html> 
+    `;
+
+         const blob = new Blob([htmlContent], { type: "text/html" });
+         const url = URL.createObjectURL(blob);
+
+         const link = document.createElement("a");
+         link.href = url;
+         link.download = "rooms_schedule.html";
+         document.body.appendChild(link);
+         link.click();
+         document.body.removeChild(link);
+      });
+
+
+
    </script>
+
 
 </body>
 

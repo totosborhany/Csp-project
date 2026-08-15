@@ -1,0 +1,4 @@
+config.env/
+uploads/
+node_modules/
+.vscode/

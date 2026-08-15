@@ -1,0 +1,11 @@
+InstructorID,Name,Role,nonPreferredSlots,QualifiedCourses
+PROF01,Dr. Ahmed Samir,Professor,Sunday,"ENG101, ENG201"
+PROF02,Dr. Mona Hassan,Professor,Monday,"ENG102, ENG104"
+PROF03,Dr. Hossam Farouk,Professor,Tuesday,"ENG103, ENG301"
+PROF04,Dr. Omar Yasser,Professor,Wednesday,"ENG203, ENG303"
+PROF05,Dr. Nour El-Din,Professor,Thursday,"ENG302, ENG304"
+PROF06,Eng. Fatma Salah,Assistant,Sunday,"ENG101, ENG103"
+PROF07,Eng. Karim Magdy,Assistant,Tuesday,"ENG203, ENG303"
+PROF08,Eng. Nesma Adel,Assistant,Wednesday,"ENG404, ENG405"
+PROF09,Dr. Tarek Lotfy,Professor,Monday,"ENG401, ENG402"
+PROF10,Dr. Rania Kamal,Professor,Thursday,"ENG403, ENG404"
