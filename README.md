@@ -13,6 +13,7 @@ file:///home/totos_aboelshuur/Downloads/rooms_schedule%20(7).html
 - **Algorithm:** Constraint Satisfaction Problem (CSP) Engine
 - **Input Format:** CSV files (`section.csv`, `TimeSlots.csv`, `coursats.csv`, `Rooms.csv`, `Instructor.csv`)
 - **Output:** Interactive HTML Schedule (`rooms_schedule.html`)
+- sample output =  https://host-html-user.com/p/k58rwl
 
 ---
 
